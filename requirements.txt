@@ -1,0 +1,8 @@
+streamlit
+requests
+fastapi
+google-genai
+python-dotenv
+uvicorn
+PyMuPDF
+python-multipart

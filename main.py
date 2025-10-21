@@ -36,17 +36,11 @@ Constraints:
 - Be concise and objective.
 """
 
-# --------------------------
-# Helper: PDF temizle
-# --------------------------
 def clean_text(text: str) -> str:
-    text = re.sub(r"\n\s*\n", "\n", text)   # boş satırları azalt
-    text = re.sub(r"Page \d+ of \d+", "", text)  # page numaraları temizle
+    text = re.sub(r"\n\s*\n", "\n", text)
+    text = re.sub(r"Page \d+ of \d+", "", text)
     return text.strip()
 
-# --------------------------
-# Helper: keyword skorlama
-# --------------------------
 def keyword_score(text: str, keywords: List[str]) -> int:
     score = 0
     for kw in keywords:
@@ -54,9 +48,6 @@ def keyword_score(text: str, keywords: List[str]) -> int:
             score += 1
     return score
 
-# --------------------------
-# Endpoint
-# --------------------------
 @app.post("/")
 async def upload_zip(
     file: UploadFile = File(...),
@@ -81,26 +72,17 @@ async def upload_zip(
     if not resumes:
         return {"error": "No PDF files found."}
 
-    # --------------------------
-    # Ön eleme (keyword filtering)
-    # --------------------------
     keywords = requirements.split()  # basit anahtar kelime listesi
     for r in resumes:
         r["score"] = keyword_score(r["text"], keywords)
 
-    # skora göre sırala
     resumes = sorted(resumes, key=lambda x: x["score"], reverse=True)
 
-    # sadece top %50 al
     keep_n = max(1, len(resumes) // 2)
     filtered_resumes = resumes[:keep_n]
 
-    # --------------------------
-    # AI çağrısı
-    # --------------------------
     client = genai.Client()
 
-    # kullanıcı kriterlerini de prompt’a ekliyoruz
     prompt_text = f"User requirements: {requirements}\n\nResumes:\n"
     for r in filtered_resumes:
         prompt_text += f"\nFilename: {r['filename']}\n{r['text']}\n"

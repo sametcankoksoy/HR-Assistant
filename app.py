@@ -33,7 +33,9 @@ if st.button("Analyze Resumes"):
             if response.status_code == 200:
                 ai_response = response.json().get("ai_response", "")
                 st.success("✅ Analysis complete! Top 5 candidates:")
-                st.text(ai_response)
+                # Markdown karakterlerini düzelt (ör: ** yerine __ veya hatalı karakterleri düzelt)
+                fixed_response = ai_response.replace('**', '__')
+                st.markdown(fixed_response, unsafe_allow_html=False)
             else:
                 st.error(f"Backend returned an error: {response.status_code}")
         except Exception as e:
